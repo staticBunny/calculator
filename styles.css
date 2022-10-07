@@ -1,0 +1,50 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: aqua;
+}
+#container {
+    display:flex;
+    flex-direction: column;
+    background-color: grey;
+    width: 180px;
+}
+
+#screen {
+    display:flex;
+    flex-direction: column;
+    background-color: green;
+    min-height: 50px;
+    gap: 10px;
+    padding: 10px;
+}
+
+#buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    padding: 10px;
+    background-color: yellow;
+    gap: 8px;
+}
+
+.button {
+    width: 30px;
+}
+
+#input,
+#output {
+    display:flex;
+    align-self: flex-end;
+}
+
+#input {
+    background-color: pink;
+}
+
+#output {
+    background-color: grey;
+}
