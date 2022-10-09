@@ -1,13 +1,16 @@
 'use strict';
 
 const MAX_INPUT_LENGTH = 20;
-
-/* Pure functions */
+const TEST_ARRRAY = ['-', '9', '*', '10', '+', '11', '/', '13', '%', '-', '5'];
 
 const add = (a, b) => a + b;
 const subtract = (a, b) => a - b;
 const multiply = (a, b) => a * b;
 const divide = (a, b) => a / b;
+const percent = (a, b=100) => a / b;
+
+const LOW_PRECEDENCE = [add, subtract];
+const HIGH_PRECEDENCE = [multiply, divide];
 
 const operate = (operator, a, b) => operator(a, b);
 
@@ -31,7 +34,88 @@ const canPutNumber = (string, num) => {
     return true;
 }
 
-/* --- */
+const removeEmptyChar = (arr) => {
+    return arr.reduce((accum, current) => {
+        if (current == '') return accum;
+        return accum.concat([current]);
+    }, []);
+}
+
+const prependZeroIfRequired = (arr) => {
+    if (isOperator(arr[0])) return ['0'].concat(arr);
+    return arr;
+}
+
+const addNumAfterPercent = (arr) => {
+    return arr.reduce((previousChars, currentChar) => {
+        if (currentChar == '%') {
+            return previousChars.concat([currentChar, '100']);
+        }
+        return previousChars.concat(currentChar);
+    }, []);
+}
+
+const switchToOperationNames = (arr) => {
+    return arr.map(char => {
+        if (char == '+') return add;
+        if (char == '*') return multiply;
+        if (char == '/') return divide;
+        if (char == '-') return subtract;
+        if (char == '%') return percent;
+        return char;
+    })
+}
+
+const hasHigherPrecedence = (operator1, operator2) => {
+    if (LOW_PRECEDENCE.includes(operator1) && 
+    LOW_PRECEDENCE.includes(operator2)) return true;
+
+    if (HIGH_PRECEDENCE.includes(operator1) &&
+    (HIGH_PRECEDENCE.includes(operator2)) ||
+    LOW_PRECEDENCE.includes(operator2)) return true;
+
+    if (operator1 == percent) return true;
+
+    return false;
+}
+
+const convertToNum = arr => {
+    return arr.map(char => isNumber(char) ? +char : char);
+}
+
+const doOneOperation = (mainArr, collector = []) => {
+    if (mainArr.length == 3) {
+        return collector.concat(
+            [operate(mainArr[1], mainArr[0], mainArr[2])]
+            );
+    }
+    if (hasHigherPrecedence(mainArr[1], mainArr[3])) {
+        return collector.concat(
+            [operate(mainArr[1], mainArr[0], mainArr[2])].concat(
+                mainArr.slice(3)
+            )
+        );
+    }
+    return doOneOperation(mainArr.slice(2), collector.concat(
+        mainArr.slice(0,2)
+    ));
+}
+
+const repeatFunction = (f, arr) => {
+    if (arr.length == 1) return arr[0];
+    return repeatFunction(f, f(arr));
+}
+
+const computeFinalOutput = arr => {
+    return repeatFunction(doOneOperation, 
+        convertToNum(
+            switchToOperationNames(
+                addNumAfterPercent(
+                    prependZeroIfRequired(arr)
+                )
+            )
+        ));
+}
 
 
 const inputDiv = document.querySelector('#input');
@@ -56,14 +140,50 @@ function showInput(e) {
     }
 }
 
+function showOutput(e) {
+    if (this.document) {
+        if (e.keyCode != 13 && e.key != '=') return;
+    }
+    else {
+        if (this.id != '=') return;
+    }
+
+    const arr = parseInput();
+    if (arr == []) {
+        outputDiv.textContent = '0';
+        return;
+    }
+
+    outputDiv.textContent = computeFinalOutput(arr);
+}
+
 function checkForEvents() {
     window.addEventListener('keydown', showInput);
     BUTTONS.forEach(button => button.addEventListener('click', showInput));
+
+    window.addEventListener('keydown', showOutput);
+    BUTTONS.forEach(button => button.addEventListener('click', showOutput));
 }
 
 function clearInput() {
     inputDiv.textContent = '';
 }
 
+function parseInput() {
+    let arr = inputDiv.textContent.split(' ');
+    arr = removeEmptyChar(arr);
+    
+    if (arr == []) return arr;
+    const last = arr[arr.length-1];
+
+    if (isOperator(last) && last != '%') return arr.slice(0, -1);
+    return arr;
+}
+
 clearInput();
 checkForEvents();
+
+let arr = prependZeroIfRequired(TEST_ARRRAY);
+arr = addNumAfterPercent(arr);
+arr = switchToOperationNames(arr);
+arr = convertToNum(arr);
