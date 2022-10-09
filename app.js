@@ -161,6 +161,9 @@ function showInput(e) {
         }    
     }
     if (isOperator(char)) {
+        if (outputDiv.textContent != '0' && inputDiv.textContent == '') {
+            inputDiv.textContent = outputDiv.textContent;
+        }
         if (canPutOperator(inputDiv.textContent, char)) {
             inputDiv.textContent += ` ${char} `;
         }
