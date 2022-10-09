@@ -28,7 +28,7 @@ const canPutOperator = (string, operator) => {
     return false;
 }
 
-const canPutNumber = (string, num) => {
+const canPutNumber = (string) => {
     if (string.slice(-2, -1) == '%') return false;
     if (string.split(' ').at(-1).length == MAX_INPUT_LENGTH) return false;
     return true;
@@ -123,13 +123,25 @@ const outputDiv = document.querySelector('#output');
 
 const BUTTONS = document.querySelectorAll('button');
 
+function putDecimal() {
+    const arr = getArrayFromInput();
+    if (arr.length == 0) {
+        inputDiv.textContent = '0.';
+        return;
+    }
+    const last = arr[arr.length-1];
+    if (isOperator(last)) return;
+    if (last.includes('.')) return;
+    inputDiv.textContent += '.';
+}
+
 function showInput(e) {
     let char;
     if (this.document) char = e.key;
     else char = this.id;
 
     if (isNumber(char)) {
-        if (canPutNumber(inputDiv.textContent, char)){
+        if (canPutNumber(inputDiv.textContent)){
             inputDiv.textContent += char;
         }    
     }
@@ -137,6 +149,9 @@ function showInput(e) {
         if (canPutOperator(inputDiv.textContent, char)) {
             inputDiv.textContent += ` ${char} `;
         }
+    }
+    if (char == '.') {
+        putDecimal();
     }
 }
 
@@ -191,9 +206,14 @@ function clearScreen(e) {
     }
 }
 
-function clearLastElement() {
+function getArrayFromInput() {
     let arr = inputDiv.textContent.split(' ');
-    arr = removeEmptyChar(arr); 
+    arr = removeEmptyChar(arr);
+    return arr;
+}
+
+function clearLastElement() {
+    let arr = getArrayFromInput();
     arr.pop();
     if (isOperator(arr[arr.length-1])) {
         inputDiv.textContent = `${arr.join(' ')} `;
@@ -202,8 +222,7 @@ function clearLastElement() {
 }
 
 function parseInput() {
-    let arr = inputDiv.textContent.split(' ');
-    arr = removeEmptyChar(arr);
+    let arr = getArrayFromInput();
     
     if (arr == []) return arr;
     const last = arr[arr.length-1];
