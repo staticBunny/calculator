@@ -1,7 +1,6 @@
 'use strict';
 
 const MAX_INPUT_LENGTH = 20;
-const TEST_ARRRAY = ['-', '9', '*', '10', '+', '11', '/', '13', '%', '-', '5'];
 
 const add = (a, b) => a + b;
 const subtract = (a, b) => a - b;
@@ -15,6 +14,7 @@ const HIGH_PRECEDENCE = [multiply, divide];
 const operate = (operator, a, b) => operator(a, b);
 
 const isNumber = char => (char >= '0') && (char <= '9') ? true : false;
+
 const isOperator = char => {
     if (char == '/' || char == '*' || char == '+' || char == '-' || char == '%'){
         return true;
@@ -123,6 +123,12 @@ const outputDiv = document.querySelector('#output');
 
 const BUTTONS = document.querySelectorAll('button');
 
+function getArrayFromInput() {
+    let arr = inputDiv.textContent.split(' ');
+    arr = removeEmptyChar(arr);
+    return arr;
+}
+
 function putDecimal() {
     const arr = getArrayFromInput();
     if (arr.length == 0) {
@@ -133,6 +139,15 @@ function putDecimal() {
     if (isOperator(last)) return;
     if (last.includes('.')) return;
     inputDiv.textContent += '.';
+}
+
+function parseInput() {
+    let arr = getArrayFromInput();
+    if (arr.length == 0) return arr;
+
+    const last = arr[arr.length-1];
+    if (isOperator(last) && last != '%') return arr.slice(0, -1);
+    return arr;
 }
 
 function showInput(e) {
@@ -164,7 +179,7 @@ function showOutput(e) {
     }
 
     const arr = parseInput();
-    if (arr == []) {
+    if (arr.length == 0) {
         outputDiv.textContent = '0';
         return;
     }
@@ -172,15 +187,13 @@ function showOutput(e) {
     outputDiv.textContent = computeFinalOutput(arr);
 }
 
-function checkForEvents() {
-    window.addEventListener('keydown', showInput);
-    BUTTONS.forEach(button => button.addEventListener('click', showInput));
-
-    window.addEventListener('keydown', showOutput);
-    BUTTONS.forEach(button => button.addEventListener('click', showOutput));
-
-    window.addEventListener('keydown', clearScreen);
-    BUTTONS.forEach(button => button.addEventListener('click', clearScreen));
+function clearLastElement() {
+    let arr = getArrayFromInput();
+    arr.pop();
+    if (isOperator(arr[arr.length-1])) {
+        inputDiv.textContent = `${arr.join(' ')} `;
+    }
+    else inputDiv.textContent = arr.join(' ');
 }
 
 function clearScreen(e) {
@@ -194,46 +207,26 @@ function clearScreen(e) {
         if (this.id != 'ac' && this.id != 'c') return;
         option = this.id;
     }
-    console.log('works');
 
     if (option == 'c') {
         clearLastElement();
     }
 
     if (option == 'ac') {
+        if (inputDiv.textContent == '') outputDiv.textContent = 0;
         inputDiv.textContent = '';
-        outputDiv.textContent = 0;
     }
 }
 
-function getArrayFromInput() {
-    let arr = inputDiv.textContent.split(' ');
-    arr = removeEmptyChar(arr);
-    return arr;
-}
+function checkForEvents() {
+    window.addEventListener('keydown', showInput);
+    BUTTONS.forEach(button => button.addEventListener('click', showInput));
 
-function clearLastElement() {
-    let arr = getArrayFromInput();
-    arr.pop();
-    if (isOperator(arr[arr.length-1])) {
-        inputDiv.textContent = `${arr.join(' ')} `;
-    }
-    else inputDiv.textContent = arr.join(' ');
-}
+    window.addEventListener('keydown', showOutput);
+    BUTTONS.forEach(button => button.addEventListener('click', showOutput));
 
-function parseInput() {
-    let arr = getArrayFromInput();
-    
-    if (arr == []) return arr;
-    const last = arr[arr.length-1];
-
-    if (isOperator(last) && last != '%') return arr.slice(0, -1);
-    return arr;
+    window.addEventListener('keydown', clearScreen);
+    BUTTONS.forEach(button => button.addEventListener('click', clearScreen));
 }
 
 checkForEvents();
-
-let arr = prependZeroIfRequired(TEST_ARRRAY);
-arr = addNumAfterPercent(arr);
-arr = switchToOperationNames(arr);
-arr = convertToNum(arr);
