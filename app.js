@@ -163,10 +163,42 @@ function checkForEvents() {
 
     window.addEventListener('keydown', showOutput);
     BUTTONS.forEach(button => button.addEventListener('click', showOutput));
+
+    window.addEventListener('keydown', clearScreen);
+    BUTTONS.forEach(button => button.addEventListener('click', clearScreen));
 }
 
-function clearInput() {
-    inputDiv.textContent = '';
+function clearScreen(e) {
+    let option;
+    if (this.document) {
+        if (e.keyCode == 8) option = 'c';
+        else if (e.keyCode == 27) option = 'ac';
+        else return;
+    }
+    else {
+        if (this.id != 'ac' && this.id != 'c') return;
+        option = this.id;
+    }
+    console.log('works');
+
+    if (option == 'c') {
+        clearLastElement();
+    }
+
+    if (option == 'ac') {
+        inputDiv.textContent = '';
+        outputDiv.textContent = 0;
+    }
+}
+
+function clearLastElement() {
+    let arr = inputDiv.textContent.split(' ');
+    arr = removeEmptyChar(arr); 
+    arr.pop();
+    if (isOperator(arr[arr.length-1])) {
+        inputDiv.textContent = `${arr.join(' ')} `;
+    }
+    else inputDiv.textContent = arr.join(' ');
 }
 
 function parseInput() {
@@ -180,7 +212,6 @@ function parseInput() {
     return arr;
 }
 
-clearInput();
 checkForEvents();
 
 let arr = prependZeroIfRequired(TEST_ARRRAY);
